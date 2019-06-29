@@ -1,4 +1,16 @@
 #!/bin/bash
+
+export API_TOKEN=$1
+export PAAS_TOKEN=$2
+export TENANTID=$3
+export ENVIRONMENTID=$4 
+
+usage()
+{
+    echo 'Usage : ./setupenv.sh API_TOKEN PAAS_TOKEN TENANTID ENVIRONMENTID (optional if a SaaS deployment)'
+    exit
+}
+
 echo "Creating GKE Cluster..."
 
 gcloud container clusters create sebootcamp --zone=us-central1-a --num-nodes=1 --machine-type=n1-standard-2 --image-type=Ubuntu
@@ -15,17 +27,32 @@ kubectl create -f https://raw.githubusercontent.com/Dynatrace/dynatrace-oneagent
 
 kubectl -n dynatrace create secret generic oneagent --from-literal="apiToken="$1 --from-literal="paasToken="$2
 
-rm cr.yaml
+if [[ -f "cr.yaml" ]]; then
+    rm cr.yaml
+    echo "Removed cr.yaml"
+fi
 
 curl -o cr.yaml https://raw.githubusercontent.com/Dynatrace/dynatrace-oneagent-operator/$LATEST_RELEASE/deploy/cr.yaml
 
-sed -i 's/apiUrl: https:\/\/ENVIRONMENTID.live.dynatrace.com\/api/apiUrl: https:\/\/'$3'.dynatrace-managed.com\/e\/'$4'\/api/' cr.yaml
+case $# in
+        4)
+        echo "Managed Deployment"
+        sed -i 's/apiUrl: https:\/\/ENVIRONMENTID.live.dynatrace.com\/api/apiUrl: https:\/\/'$3'.dynatrace-managed.com\/e\/'$4'\/api/' cr.yaml
+        ;;
+        3)
+        echo "SaaS Deplyoment"
+        sed -i 's/apiUrl: https:\/\/ENVIRONMENTID.live.dynatrace.com\/api/apiUrl: https:\/\/'$3'.live.dynatrace.com\/api/' cr.yaml
+        ;;
+        ?)
+        usage
+        ;;
+esac
 
 kubectl create -f cr.yaml
 
 echo "Waiting for OneAgent to startup"
 
-sleep 2m
+#sleep 2m
 
 echo "Deploying SockShop Application"
 
