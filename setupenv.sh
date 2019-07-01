@@ -11,6 +11,15 @@ usage()
     exit
 }
 
+case $# in
+        3 | 4)
+        continue
+        ;;
+        ?)
+        usage
+        ;;
+esac
+
 echo "Creating GKE Cluster..."
 
 gcloud container clusters create sebootcamp --zone=us-central1-a --num-nodes=1 --machine-type=n1-standard-2 --image-type=Ubuntu
@@ -50,9 +59,9 @@ esac
 
 kubectl create -f cr.yaml
 
-echo "Waiting for OneAgent to startup"
+echo "Waiting for OneAgent to startup..."
 
-#sleep 2m
+sleep 2m
 
 echo "Deploying SockShop Application"
 
