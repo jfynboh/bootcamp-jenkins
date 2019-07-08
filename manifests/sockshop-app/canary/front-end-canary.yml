@@ -3,7 +3,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: front-end.canary
-  namespace: production
+  namespace: dev
 spec:
   replicas: 1
   template:
@@ -18,7 +18,7 @@ spec:
         support.channel: "#support-sockshop-frontend"
       labels:
         app: front-end.canary
-        stage: prod
+        stage: dev
         release: canary
         version: "1.5"
         tier: "frontend"
@@ -54,7 +54,7 @@ metadata:
   name: front-end-canary
   labels:
     app: front-end.canary
-    namespace: production
+    namespace: dev
 spec:
   ports:
   - name: http

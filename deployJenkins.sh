@@ -13,6 +13,8 @@ export JENKINS_URL_PORT=24711
 export JENKINS_USERNAME=$(kubectl get secret jenkins-secret -n cicd -o yaml | grep "username:" | sed 's~username:[ \t]*~~')
 export JENKINS_PASSWORD=$(kubectl get secret jenkins-secret -n cicd -o yaml | grep "password:" | sed 's~password:[ \t]*~~')
 
+
+
 echo "----------------------------------------------------"
 echo "Jenkins is running @ : http://$JENKINS_URL:$JENKINS_URL_PORT"
 echo "Username is :" $(echo $JENKINS_USERNAME | base64 --decode)
