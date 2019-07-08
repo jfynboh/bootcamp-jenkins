@@ -11,9 +11,11 @@ sleep 2m
 export JENKINS_URL=$(kubectl describe svc jenkins -n cicd | grep "LoadBalancer Ingress:" | sed 's~LoadBalancer Ingress:[ \t]*~~')
 export JENKINS_URL_PORT=24711
 export JENKINS_USERNAME=$(kubectl get secret jenkins-secret -n cicd -o yaml | grep "username:" | sed 's~username:[ \t]*~~')
+export JENKINS_USERNAME_DECODE=$(echo $JENKINS_USERNAME | base64 --decode)
 export JENKINS_PASSWORD=$(kubectl get secret jenkins-secret -n cicd -o yaml | grep "password:" | sed 's~password:[ \t]*~~')
+export JENKINS_PASSWORD_DECODE=$(echo $JENKINS_PASSWORD | base64 --decode)
 
-curl -s -XPOST http://$JENKINS_URL:$JENKINS_URL_PORT/createItem?name=DeployCanary -u $JENKINS_USERNAME:$JENKINS_PASSWORD --data-binary @config.xml -H "Content-Type:text/xml"
+curl -s -XPOST http://$JENKINS_URL:$JENKINS_URL_PORT/createItem?name=DeployCanary -u $JENKINS_USERNAME_DECODE:$JENKINS_PASSWORD_DECODE --data-binary @config.xml -H "Content-Type:text/xml"
 
 
 echo "----------------------------------------------------"
