@@ -6,13 +6,14 @@ kubectl create -f ./manifests/jenkins/k8s-jenkins-secret.yaml
 
 echo "Waiting for Jenkins to start..."
 
-sleep 1m
+sleep 2m
 
 export JENKINS_URL=$(kubectl describe svc jenkins -n cicd | grep "LoadBalancer Ingress:" | sed 's~LoadBalancer Ingress:[ \t]*~~')
 export JENKINS_URL_PORT=24711
 export JENKINS_USERNAME=$(kubectl get secret jenkins-secret -n cicd -o yaml | grep "username:" | sed 's~username:[ \t]*~~')
 export JENKINS_PASSWORD=$(kubectl get secret jenkins-secret -n cicd -o yaml | grep "password:" | sed 's~password:[ \t]*~~')
 
+curl -s -XPOST http://$JENKINS_URL:$JENKINS_URL_PORT/createItem?name=DeployCanary -u $JENKINS_USERNAME:$JENKINS_PASSWORD --data-binary @config.xml -H "Content-Type:text/xml"
 
 
 echo "----------------------------------------------------"
