@@ -39,7 +39,7 @@
           <stringProp name="LoopController.loops">${__P(LoopCount,600)}</stringProp>
         </elementProp>
         <stringProp name="ThreadGroup.num_threads">${__P(VUCount,10)}</stringProp>
-        <stringProp name="ThreadGroup.ramp_time">5</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">40</stringProp>
         <longProp name="ThreadGroup.start_time">1536064517000</longProp>
         <longProp name="ThreadGroup.end_time">1536064517000</longProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
