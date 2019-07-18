@@ -1,0 +1,103 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.33">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.3.8"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.3.8">
+      <jobProperties/>
+      <triggers/>
+      <parameters/>
+      <options/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.72">
+    <script>pipeline{
+    agent {
+        label &apos;jenkins-slave&apos;
+    }
+    environment {
+        CARTS_URL = get_carts_url()
+    }
+    stages{
+        stage(&apos;Checkout code&apos;){
+            steps{
+                git &apos;https://github.com/wmsegar/bootcamp-jenkins.git&apos;
+            }
+        }
+        stage(&apos;Build Code&apos;) {
+            steps{
+                container(&apos;mvn&apos;){
+                    echo &apos;Code Building...&apos;
+                    script {
+                        sh &apos;mvn -v&apos;
+                    }
+                    //sleep 20    
+                }
+            }
+        }
+        stage(&apos;Build Image&apos;){
+            steps{
+                container(&apos;docker&apos;){
+                    echo &apos;Image Building...&apos;
+                    script{
+                        sh &apos;docker&apos;
+                    }
+                    //sleep 20
+                }
+            }
+        }
+        stage(&apos;Push Image to Repo&apos;){
+            steps{
+                container(&apos;docker&apos;){
+                    echo &apos;Pushing Image...&apos;
+                    script{
+                        sh &apos;docker&apos;
+                    }
+                    //sleep 20
+                }
+            }
+        }
+        /*stage(&apos;Deploy to Staging&apos;){
+            steps{
+                container(&apos;kubectl&apos;){
+                    echo &apos;Deployment canary build...&apos;
+                    script{
+                        sh &apos;ls $WORKSPACE&apos;
+                        sh &apos;kubectl apply -f $WORKSPACE/manifests/sockshop-app/canary/carts2-canary.yml&apos;
+                        sleep 300
+                        echo &quot;Waiting for carts service to start...&quot;
+                    }
+                }
+            }
+        } */
+        stage(&apos;Health Check&apos;){
+            steps{
+                container(&apos;curl&apos;){
+                    script{
+                        echo env.CARTS_URL
+                        sh curl -d &apos;{&quot;id&quot;:&quot;510a0d7e-8e83-4193-b483-e27e09ddc34d&quot;}&apos; -H &quot;Content-Type: application/json&quot; -X POST env.CARTS_URL
+                    }
+                }
+            }
+        }
+    }
+}
+
+    def get_carts_url() {
+        container(&apos;kubectl&apos;){
+            script{
+                dir(&quot;loadtest&quot;){
+                    sh &quot;chmod +x cartstest.sh&quot;
+                    def output = sh returnStdout: true, script: &apos;/home/jenkins/workspace/DeploySockShop/loadtest/cartstest.sh&apos;
+                    return output
+                }
+            }
+        }
+    }</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
