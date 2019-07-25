@@ -7,7 +7,7 @@ kubectl create -f ./manifests/jenkins/k8s-jenkins-secret.yaml
 
 echo "Waiting for Jenkins to start..."
 
-sleep 2m
+sleep 120
 
 export JENKINS_URL=$(kubectl describe svc jenkins -n cicd | grep "LoadBalancer Ingress:" | sed 's~LoadBalancer Ingress:[ \t]*~~')
 export JENKINS_URL_PORT=24711
